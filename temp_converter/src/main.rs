@@ -1,14 +1,14 @@
 use std::io;
 
-fn convert_to_f(celcius: i32) -> i32 {
-    return (celcius * 9/5) + 32;
+fn convert_to_f(celcius: f64) -> f64 {
+    return (celcius * 9.0/5.0) + 32.0;
 }
 
-fn convert_to_c(fahrenheit: i32) -> i32 {
-    return (fahrenheit - 32) * 5/9;
+fn convert_to_c(fahrenheit: f64) -> f64 {
+    return (fahrenheit - 32.0) * 5.0/9.0;
 }
 
-fn main() {
+fn get_num_option() -> i32 {
     println!("Which conversion are you doing?
                 1. Celcius to Fahrenheit
                 2. Fahrenheit to Celcius");
@@ -19,39 +19,56 @@ fn main() {
         .read_line(&mut user_input)
         .expect("Failed to read input");
 
-    let trimmed = user_input.trim();
+        match user_input.trim().parse::<i32>() {
+            Ok(i) if i == 1 || i == 2 => i,
+            _ => {
+                println!("Invalid choice, try again");
+                return 0;
+            },
+        }
+}
 
-    let num_option = match trimmed.parse::<i32>() {
-        Ok(i) if i == 1 || i == 2 => i,
-        _ => {
-            println!("Invalid choice");
-            return;
-        },
-    };
-
+fn get_temp_input() -> Option<f64> {
     println!("Enter your temperature: ");
 
-    user_input = String::new();
+    let mut user_input = String::new();
 
     io::stdin()
         .read_line(&mut user_input)
         .expect("Failed to read input");
 
-    let trimmed = user_input.trim();
-
-    let temp_input: i32 = match trimmed.parse::<i32>() {
-        Ok(i) => i,
+    match user_input.trim().parse::<f64>() {
+        Ok(i) => Some(i),
         _ => {
-            println!("Invalid temperature");
-            return;
+            None
         }
-    };
+    }
+}
 
-    if num_option == 1 {
-        let f_temp = convert_to_f(temp_input);
-        println!("{temp_input}C is {f_temp}F");
-    } else if num_option == 2 {
-        let c_temp = convert_to_c(temp_input);
-        println!("{temp_input}F is {c_temp}C");
+fn main() {
+    let mut num_option = get_num_option();
+
+    while num_option == 0 {
+        num_option = get_num_option();
+    }
+
+    loop {
+        let temp_input = get_temp_input();
+
+        match temp_input {
+            Some(temp) => {
+                if num_option == 1 {
+                    let f_temp = convert_to_f(temp);
+                    println!("{:.2}C is {:.2}F", temp, f_temp);
+                } else if num_option == 2 {
+                    let c_temp = convert_to_c(temp);
+                    println!("{:.2}F is {:.2}C", temp, c_temp);
+                }
+                break;
+            },
+            None => {
+                println!("Invalid temperature. Try again.");
+            },
+        }
     }
 }
